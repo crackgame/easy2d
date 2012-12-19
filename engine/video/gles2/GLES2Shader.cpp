@@ -1,5 +1,4 @@
-#include "../IVideo.h"
-#include "GLES2Video.h"
+#include "GLES2Shader.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,19 +28,6 @@ namespace easy2d {
 			system("pause"); \
 			exit(1); \
 		} \
-	}
-
-
-	// 全局函数
-	IVideo* CreateVideoGLES2()
-	{
-		return new GLES2Video;
-	}
-
-	void ReleaseVideo(IVideo** pVideo)
-	{
-		delete *pVideo;
-		*pVideo = NULL;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -182,7 +168,7 @@ namespace easy2d {
 
 	//////////////////////////////////////////////////////////////////////////
 
-	GLES2Video::GLES2Video()
+	GLES2Shader::GLES2Shader()
 	{
 		mClearColor = 0;
 		mEGLDisplay = NULL;
@@ -190,12 +176,12 @@ namespace easy2d {
 		mEGLContext = NULL;
 	}
 
-	GLES2Video::~GLES2Video()
+	GLES2Shader::~GLES2Shader()
 	{
 		cleanup();
 	}
 
-	void GLES2Video::cleanup()
+	void GLES2Shader::cleanup()
 	{
 		/* Cleanup shaders */
 		GL_CHECK(glUseProgram(0));
@@ -218,7 +204,7 @@ namespace easy2d {
 #endif
 	}
 
-	bool GLES2Video::create(void* hWindow, unsigned int width, unsigned int height, bool isFullScreen)
+	bool GLES2Shader::create(void* hWindow, unsigned int width, unsigned int height, bool isFullScreen)
 	{
 		// 初始化EGL相关数据
 #ifdef _WIN32
@@ -288,7 +274,7 @@ namespace easy2d {
 		return true;
 	}
 
-	void GLES2Video::clear(unsigned int color /* = 0x00000000 */)
+	void GLES2Shader::clear(unsigned int color /* = 0x00000000 */)
 	{
 		if (mClearColor != color) {
 			mClearColor = color;
@@ -303,12 +289,12 @@ namespace easy2d {
 		GL_CHECK( glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT) );
 	}
 
-	void GLES2Video::present()
+	void GLES2Shader::present()
 	{
 		EGL_CHECK( eglSwapBuffers(mEGLDisplay, mEGLSurface) );
 	}
 
-	void GLES2Video::render()
+	void GLES2Shader::render()
 	{
 		// 测试的代码
 		Draw();
