@@ -8,10 +8,13 @@ namespace easy2d {
 	public:
 		GLES2Video();
 		virtual ~GLES2Video();
-		bool create(void* hWindow, unsigned int width, unsigned int height, bool isFullScreen);
-		void clear(unsigned int color = 0x00000000);
-		void present();
-		void render();
+		virtual bool create(void* hWindow, unsigned int width, unsigned int height, bool isFullScreen);
+		virtual void clear(unsigned int color = 0x00000000);
+		virtual void present();
+		virtual void render();
+
+		// ¹¤³§º¯Êý
+		virtual IShader* createShader();
 
 	protected:
 		void cleanup();

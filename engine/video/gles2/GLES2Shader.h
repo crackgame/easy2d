@@ -3,24 +3,25 @@
 
 namespace easy2d {
 
-	class GLES2Shader
+	class GLES2Shader : public IShader
 	{
 	public:
 		GLES2Shader();
 		virtual ~GLES2Shader();
-		bool create(void* hWindow, unsigned int width, unsigned int height, bool isFullScreen);
-		void clear(unsigned int color = 0x00000000);
-		void present();
-		void render();
+		virtual bool create(const char* vertexSource, const char* fragmentSource);
+		virtual bool bindAttrib(unsigned int index, const char* name);
+		virtual bool setVertexPointer(unsigned int index, const void* ptr, int stride, EVertexFormat foramt);
+		virtual void use();
 
 	protected:
-		void cleanup();
+		GLuint loadShader(GLenum type, const char *shaderSrc);
+		bool checkProgramInfoLog();
+		bool transOpenGLParams();
 
 	protected:
-		void*	mEGLDisplay;
-		void*	mEGLSurface;
-		void*	mEGLContext;
-		unsigned int mClearColor;
+		GLuint mProgramObject;
+		GLuint mVertexShader;
+		GLuint mFragmentShader;
 	};
 
 

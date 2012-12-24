@@ -10,7 +10,35 @@ using namespace easy2d;
 
 IApplication* g_pApp = NULL;
 IVideo* g_pVideo = NULL;
+IShader* g_shader = NULL;
 
+char vShaderStr[] =  
+"attribute vec4 vPosition;    \n"
+"void main()                  \n"
+"{                            \n"
+"   gl_Position = vPosition;  \n"
+"}                            \n";
+
+char fShaderStr[] =  
+"precision mediump float;\n"\
+"void main()                                  \n"
+"{                                            \n"
+"  gl_FragColor = vec4 ( 0.0, 1.0, 0.0, 1.0 );\n"
+"}                                            \n";             
+
+/*
+float vVertices[] = {  
+	0.0f,  0.5f, 0.0f, 
+	-0.5f, -0.5f, 0.0f,
+	0.5f, -0.5f, 0.0f };
+	*/
+
+float vVertices[] = {  
+	0.0f,  0.5f, 0.0f, 
+	0.0f,  0.5f, 0.0f, 
+	-0.5f, -0.5f, 0.0f,
+	0.0f,  0.5f, 0.0f, 
+	0.5f, -0.5f, 0.0f };
 
 
 class GameAppListener : public IApplication::IApplicationEventListener
@@ -22,11 +50,20 @@ public:
 		int height = g_pApp->getHeight();
 		void* hWindow = g_pApp->getWindowHandle();
 		g_pVideo->create(hWindow, width, height, false);
+
+		g_shader = g_pVideo->createShader();
+		g_shader->create(vShaderStr, fShaderStr);
+		g_shader->bindAttrib(0, "vPosition");
+		g_shader->use();
+		g_shader->setVertexPointer(0, vVertices, 0, IShader::FLOAT_3);
+
 		return true;
 	}
 
 	virtual void onRender()
 	{
+		
+
 		g_pVideo->clear();
 		g_pVideo->render();
 		g_pVideo->present();
@@ -72,6 +109,7 @@ int main()
 
 	g_pApp = CreateApplication();
 	g_pVideo = CreateVideoGLES2();
+;
 
 	g_pApp->setTitle( TEXT("OpenglES2-ÓÎÏ·´°¿Ú") );
 	g_pApp->setEventListener(&appEvent);

@@ -1,12 +1,14 @@
 #ifndef	_IVIDEO_H_
 #define _IVIDEO_H_
+#include "IShader.h"
 
 namespace easy2d {
+
 
 class IVideo
 {
 public:
-	enum VideoType
+	enum EVideoType
 	{
 		VideoGLES2,
 		VideoD3D9,
@@ -18,6 +20,9 @@ public:
 	virtual void clear(unsigned int color = 0x00000000) = 0;
 	virtual void present() = 0;
 	virtual void render() = 0;
+
+	// ¹¤³§º¯Êý
+	virtual IShader* createShader() = 0;
 	
 };
 

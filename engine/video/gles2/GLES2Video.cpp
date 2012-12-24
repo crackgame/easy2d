@@ -1,11 +1,13 @@
 #include "../IVideo.h"
+#include "GLES2/gl2.h"
+#include "EGL/egl.h"
+
 #include "GLES2Video.h"
+#include "GLES2Shader.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "GLES2/gl2.h"
-#include "EGL/egl.h"
 
 namespace easy2d {
 
@@ -45,143 +47,7 @@ namespace easy2d {
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-
-	// ÁÙÊ±²âÊÔ
-	GLuint LoadShader ( GLenum type, const char *shaderSrc )
-	{
-		GLuint shader;
-		GLint compiled;
-
-		// Create the shader object
-		shader = glCreateShader ( type );
-
-		if ( shader == 0 )
-			return 0;
-
-		// Load the shader source
-		glShaderSource ( shader, 1, &shaderSrc, NULL );
-
-		// Compile the shader
-		glCompileShader ( shader );
-
-		// Check the compile status
-		glGetShaderiv ( shader, GL_COMPILE_STATUS, &compiled );
-
-		if ( !compiled ) 
-		{
-			GLint infoLen = 0;
-
-			glGetShaderiv ( shader, GL_INFO_LOG_LENGTH, &infoLen );
-
-			if ( infoLen > 1 )
-			{
-				char* infoLog = new char[infoLen];
-
-				glGetShaderInfoLog ( shader, infoLen, NULL, infoLog );
-				printf( "Error compiling shader:\n%s\n", infoLog );            
-
-				delete[] infoLog;
-			}
-
-			glDeleteShader ( shader );
-			return 0;
-		}
-
-		return shader;
-
-	}
-
-
-	GLuint programObject = 0;
-
-	int Init ()
-	{
-		char vShaderStr[] =  
-			"attribute vec4 vPosition;    \n"
-			"void main()                  \n"
-			"{                            \n"
-			"   gl_Position = vPosition;  \n"
-			"}                            \n";
-
-		char fShaderStr[] =  
-			"precision mediump float;\n"\
-			"void main()                                  \n"
-			"{                                            \n"
-			"  gl_FragColor = vec4 ( 1.0, 0.0, 0.0, 1.0 );\n"
-			"}                                            \n";
-
-		GLuint vertexShader;
-		GLuint fragmentShader;
-		//GLuint programObject;
-		GLint linked;
-
-		// Load the vertex/fragment shaders
-		vertexShader = LoadShader ( GL_VERTEX_SHADER, vShaderStr );
-		fragmentShader = LoadShader ( GL_FRAGMENT_SHADER, fShaderStr );
-
-		// Create the program object
-		programObject = glCreateProgram ( );
-
-		if ( programObject == 0 )
-			return 0;
-
-		glAttachShader ( programObject, vertexShader );
-		glAttachShader ( programObject, fragmentShader );
-
-		// Bind vPosition to attribute 0   
-		glBindAttribLocation ( programObject, 0, "vPosition" );
-
-		// Link the program
-		glLinkProgram ( programObject );
-
-		// Check the link status
-		glGetProgramiv ( programObject, GL_LINK_STATUS, &linked );
-
-		if ( !linked ) 
-		{
-			GLint infoLen = 0;
-
-			glGetProgramiv ( programObject, GL_INFO_LOG_LENGTH, &infoLen );
-
-			if ( infoLen > 1 )
-			{
-				char* infoLog = new char[infoLen];
-
-				glGetProgramInfoLog ( programObject, infoLen, NULL, infoLog );
-				printf( "Error linking program:\n%s\n", infoLog );            
-
-				delete[] infoLog;
-			}
-
-			glDeleteProgram ( programObject );
-			return FALSE;
-		}
-
-		return TRUE;
-	}
-
-
-	///
-	// Draw a triangle using the shader pair created in Init()
-	//
-	void Draw()
-	{
-		GLfloat vVertices[] = {  0.0f,  0.5f, 0.0f, 
-			-0.5f, -0.5f, 0.0f,
-			0.5f, -0.5f, 0.0f };
-
-		// Use the program object
-		glUseProgram ( programObject );
-
-		// Load the vertex data
-		glVertexAttribPointer ( 0, 3, GL_FLOAT, GL_FALSE, 0, vVertices );
-		glEnableVertexAttribArray ( 0 );
-
-		glDrawArrays ( GL_TRIANGLES, 0, 3 );
-	}
-
-	//////////////////////////////////////////////////////////////////////////
-
+	
 	GLES2Video::GLES2Video()
 	{
 		mClearColor = 0;
@@ -199,9 +65,6 @@ namespace easy2d {
 	{
 		/* Cleanup shaders */
 		GL_CHECK(glUseProgram(0));
-		//GL_CHECK(glDeleteShader(uiVertShader));
-		//GL_CHECK(glDeleteShader(uiFragShader));
-		//GL_CHECK(glDeleteProgram(uiProgram));
 
 		/* EGL clean up */
 		EGL_CHECK(eglMakeCurrent(mEGLDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT));
@@ -283,8 +146,6 @@ namespace easy2d {
 		GL_CHECK(glEnable(GL_DEPTH_TEST));
 		GL_CHECK(glViewport (0, 0, width, height));
 
-		Init();
-
 		return true;
 	}
 
@@ -311,8 +172,12 @@ namespace easy2d {
 	void GLES2Video::render()
 	{
 		// ²âÊÔµÄ´úÂë
-		Draw();
+		glDrawArrays ( GL_TRIANGLES, 0, 3 );
 	}
 
+	IShader* GLES2Video::createShader()
+	{
+		return new GLES2Shader;
+	}
 
 }
