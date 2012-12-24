@@ -32,8 +32,10 @@ public:
 	// vShaderSource ¶¥µãshaderÔ´Âë
 	// fShaderSource Æ¬¶ÎshaderÔ´Âë
 	virtual bool create(const char* vertexSource, const char* fragmentSource) = 0;
-	virtual bool bindAttrib(unsigned int index, const char* name) = 0;
+	virtual int getAttribLocation(const char* name) = 0;
+	virtual int getUniformLocation(const char* name) = 0;
 	virtual bool setVertexPointer(unsigned int index, const void* ptr, int stride, EVertexFormat foramt) = 0;
+	virtual bool setUniform1i(int location, int x) = 0;
 	virtual void use() = 0;
 };
 

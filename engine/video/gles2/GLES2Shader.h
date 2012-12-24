@@ -9,8 +9,10 @@ namespace easy2d {
 		GLES2Shader();
 		virtual ~GLES2Shader();
 		virtual bool create(const char* vertexSource, const char* fragmentSource);
-		virtual bool bindAttrib(unsigned int index, const char* name);
+		virtual int getAttribLocation(const char* name);
+		virtual int getUniformLocation(const char* name);
 		virtual bool setVertexPointer(unsigned int index, const void* ptr, int stride, EVertexFormat foramt);
+		virtual bool setUniform1i(int location, int x);
 		virtual void use();
 
 	protected:

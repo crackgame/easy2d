@@ -163,6 +163,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\engine\video\ITexture.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\engine\video\IVideo.h"
 				>
 			</File>
@@ -183,6 +187,14 @@
 			</File>
 			<File
 				RelativePath="..\..\..\engine\video\gles2\GLES2Shader.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\engine\video\gles2\GLES2Texture.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\engine\video\gles2\GLES2Texture.h"
 				>
 			</File>
 			<File

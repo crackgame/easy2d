@@ -1,6 +1,7 @@
 #ifndef	_IVIDEO_H_
 #define _IVIDEO_H_
 #include "IShader.h"
+#include "ITexture.h"
 
 namespace easy2d {
 
@@ -23,6 +24,8 @@ public:
 
 	// ¹¤³§º¯Êý
 	virtual IShader* createShader() = 0;
+	virtual ITexture* createTexture() = 0;
+
 	
 };
 

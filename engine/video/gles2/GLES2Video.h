@@ -15,6 +15,7 @@ namespace easy2d {
 
 		// ¹¤³§º¯Êý
 		virtual IShader* createShader();
+		virtual ITexture* createTexture();
 
 	protected:
 		void cleanup();

@@ -20,15 +20,8 @@ namespace easy2d {
 
 	GLES2Shader::~GLES2Shader()
 	{
-		if (mVertexShader > 0)
-			glDeleteShader(mVertexShader);
-
-		if (mFragmentShader > 0)
-			glDeleteShader(mFragmentShader);
-
 		if (mProgramObject > 0)
 			glDeleteShader(mProgramObject);
-
 	}
 
 	GLuint GLES2Shader::loadShader(GLenum type, const char *shaderSrc)
@@ -127,13 +120,23 @@ namespace easy2d {
 		if (!checkProgramInfoLog())
 			return false;
 
+		if (mVertexShader > 0)
+			glDeleteShader(mVertexShader);
+
+		if (mFragmentShader > 0)
+			glDeleteShader(mFragmentShader);
+
 		return true;
 	}
 
-	bool GLES2Shader::bindAttrib(unsigned int index, const char* name)
+	int GLES2Shader::getAttribLocation(const char* name)
 	{
-		glBindAttribLocation ( mProgramObject, index, name );
-		return true;
+		return glGetAttribLocation(mProgramObject, name);
+	}
+
+	int GLES2Shader::getUniformLocation(const char* name)
+	{
+		return glGetUniformLocation(mProgramObject, name);
 	}
 
 	bool GLES2Shader::setVertexPointer(unsigned int index, const void* ptr, int stride, EVertexFormat foramt)
@@ -160,8 +163,14 @@ namespace easy2d {
 
 
 		// Load the vertex data
-		glVertexAttribPointer ( index, size, type, GL_FALSE, 0, ptr );
+		glVertexAttribPointer ( index, size, type, GL_FALSE, stride, ptr );
 		glEnableVertexAttribArray ( index );
+		return true;
+	}
+
+	bool GLES2Shader::setUniform1i(int location, int x)
+	{
+		glUniform1i (location, x);
 		return true;
 	}
 

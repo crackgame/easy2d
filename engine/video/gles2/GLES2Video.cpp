@@ -4,6 +4,7 @@
 
 #include "GLES2Video.h"
 #include "GLES2Shader.h"
+#include "GLES2Texture.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,13 +12,26 @@
 
 namespace easy2d {
 
+
+	/// esCreateWindow flag - RGB color buffer
+#define ES_WINDOW_RGB           0
+	/// esCreateWindow flag - ALPHA color buffer
+#define ES_WINDOW_ALPHA         1 
+	/// esCreateWindow flag - depth buffer
+#define ES_WINDOW_DEPTH         2 
+	/// esCreateWindow flag - stencil buffer
+#define ES_WINDOW_STENCIL       4
+	/// esCreateWindow flat - multi-sample buffer
+#define ES_WINDOW_MULTISAMPLE   8
+
+
+
 #define GL_CHECK(x) \
 	x; \
 	{ \
 		GLenum glError = glGetError(); \
 		if(glError != GL_NO_ERROR) { \
 			fprintf(stderr, "glGetError() = %i (0x%.8x) at line %i\n", glError, glError, __LINE__); \
-			system("pause"); \
 			exit(1); \
 		} \
 	}
@@ -28,7 +42,6 @@ namespace easy2d {
 		EGLint eglError = eglGetError(); \
 		if(eglError != EGL_SUCCESS) { \
 			fprintf(stderr, "eglGetError() = %i (0x%.8x) at line %i\n", eglError, eglError, __LINE__); \
-			system("pause"); \
 			exit(1); \
 		} \
 	}
@@ -95,13 +108,23 @@ namespace easy2d {
 
 
 		/* EGL Configuration */
-
+		int flags = ES_WINDOW_RGB;
 		EGLint aEGLAttributes[] = {
+			/*
 			EGL_RED_SIZE, 8,
 			EGL_GREEN_SIZE, 8,
 			EGL_BLUE_SIZE, 8,
 			EGL_DEPTH_SIZE, 16,
 			EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+			EGL_NONE
+			*/
+			EGL_RED_SIZE,       5,
+			EGL_GREEN_SIZE,     6,
+			EGL_BLUE_SIZE,      5,
+			EGL_ALPHA_SIZE,     (flags & ES_WINDOW_ALPHA) ? 8 : EGL_DONT_CARE,
+			EGL_DEPTH_SIZE,     (flags & ES_WINDOW_DEPTH) ? 8 : EGL_DONT_CARE,
+			EGL_STENCIL_SIZE,   (flags & ES_WINDOW_STENCIL) ? 8 : EGL_DONT_CARE,
+			EGL_SAMPLE_BUFFERS, (flags & ES_WINDOW_MULTISAMPLE) ? 1 : 0,
 			EGL_NONE
 		};
 
@@ -161,7 +184,8 @@ namespace easy2d {
 			GL_CHECK( glClearColor(r, g, b, a) );
 		}
 
-		GL_CHECK( glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT) );
+		//GL_CHECK( glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT) );
+		GL_CHECK( glClear(GL_COLOR_BUFFER_BIT) );
 	}
 
 	void GLES2Video::present()
@@ -172,12 +196,23 @@ namespace easy2d {
 	void GLES2Video::render()
 	{
 		// 测试的代码
-		glDrawArrays ( GL_TRIANGLES, 0, 3 );
+		//glDrawArrays ( GL_TRIANGLES, 0, 3 );
+		 GLushort indices[] = { 0, 1, 2, 0, 2, 3 };
+		glDrawElements ( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, indices );
 	}
+
+
+	//////////////////////////////////////////////////////////////////////////
+	// 创建函数
 
 	IShader* GLES2Video::createShader()
 	{
 		return new GLES2Shader;
+	}
+
+	ITexture* GLES2Video::createTexture()
+	{
+		return new GLES2Texture;
 	}
 
 }
