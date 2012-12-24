@@ -114,17 +114,20 @@ namespace easy2d {
 		glAttachShader (mProgramObject, mVertexShader);
 		glAttachShader (mProgramObject, mFragmentShader);
 
+		// Bind vPosition to attribute 0   
+		glBindAttribLocation ( mProgramObject, 0, "vPosition" );
+
 		// Link the program
 		glLinkProgram ( mProgramObject );
 
 		if (!checkProgramInfoLog())
 			return false;
 
-		if (mVertexShader > 0)
-			glDeleteShader(mVertexShader);
+		//if (mVertexShader > 0)
+		//	glDeleteShader(mVertexShader);
 
-		if (mFragmentShader > 0)
-			glDeleteShader(mFragmentShader);
+		//if (mFragmentShader > 0)
+		//	glDeleteShader(mFragmentShader);
 
 		return true;
 	}

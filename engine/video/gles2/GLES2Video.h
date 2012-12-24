@@ -21,9 +21,13 @@ namespace easy2d {
 		void cleanup();
 
 	protected:
+		int		mWidth;
+		int		mHeight;
 		void*	mEGLDisplay;
 		void*	mEGLSurface;
 		void*	mEGLContext;
+
+		// 效率优化
 		unsigned int mClearColor;
 	};
 

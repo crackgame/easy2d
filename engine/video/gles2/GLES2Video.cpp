@@ -26,6 +26,19 @@ namespace easy2d {
 
 
 
+	static void printGLString(const char *name, GLenum s) {
+		const char *v = (const char *) glGetString(s);
+		printf("GL %s = %s\n", name, v);
+	}
+
+	static void checkGlError(const char* op) {
+		for (GLint error = glGetError(); error; error = glGetError()) {
+				printf("after %s() glError (0x%x)\n", op, error);
+		}
+	}
+
+
+
 #define GL_CHECK(x) \
 	x; \
 	{ \
@@ -63,6 +76,8 @@ namespace easy2d {
 	
 	GLES2Video::GLES2Video()
 	{
+		mWidth = 0;
+		mHeight = 0;
 		mClearColor = 0;
 		mEGLDisplay = NULL;
 		mEGLSurface = NULL;
@@ -96,6 +111,12 @@ namespace easy2d {
 
 	bool GLES2Video::create(void* hWindow, unsigned int width, unsigned int height, bool isFullScreen)
 	{
+		printGLString("Version", GL_VERSION);
+		printGLString("Vendor", GL_VENDOR);
+		printGLString("Renderer", GL_RENDERER);
+		printGLString("Extensions", GL_EXTENSIONS);
+
+
 		// 初始化EGL相关数据
 #ifdef _WIN32
 		HDC			hDisplay = GetDC(NULL);
@@ -106,56 +127,56 @@ namespace easy2d {
 		if (hDisplay == NULL)
 			return false;
 
-
-		/* EGL Configuration */
-		int flags = ES_WINDOW_RGB;
 		EGLint aEGLAttributes[] = {
-			/*
+
 			EGL_RED_SIZE, 8,
 			EGL_GREEN_SIZE, 8,
 			EGL_BLUE_SIZE, 8,
 			EGL_DEPTH_SIZE, 16,
 			EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
 			EGL_NONE
-			*/
-			EGL_RED_SIZE,       5,
-			EGL_GREEN_SIZE,     6,
-			EGL_BLUE_SIZE,      5,
-			EGL_ALPHA_SIZE,     (flags & ES_WINDOW_ALPHA) ? 8 : EGL_DONT_CARE,
-			EGL_DEPTH_SIZE,     (flags & ES_WINDOW_DEPTH) ? 8 : EGL_DONT_CARE,
-			EGL_STENCIL_SIZE,   (flags & ES_WINDOW_STENCIL) ? 8 : EGL_DONT_CARE,
-			EGL_SAMPLE_BUFFERS, (flags & ES_WINDOW_MULTISAMPLE) ? 1 : 0,
-			EGL_NONE
 		};
+
+		///* EGL Configuration */
+		//int flags = ES_WINDOW_RGB;
+		//EGLint aEGLAttributes[] = {
+		//	EGL_RED_SIZE,       5,
+		//	EGL_GREEN_SIZE,     6,
+		//	EGL_BLUE_SIZE,      5,
+		//	EGL_ALPHA_SIZE,     (flags & ES_WINDOW_ALPHA) ? 8 : EGL_DONT_CARE,
+		//	EGL_DEPTH_SIZE,     (flags & ES_WINDOW_DEPTH) ? 8 : EGL_DONT_CARE,
+		//	EGL_STENCIL_SIZE,   (flags & ES_WINDOW_STENCIL) ? 8 : EGL_DONT_CARE,
+		//	EGL_SAMPLE_BUFFERS, (flags & ES_WINDOW_MULTISAMPLE) ? 1 : 0,
+		//	EGL_NONE
+		//};
 
 		EGLint aEGLContextAttributes[] = {
 			EGL_CONTEXT_CLIENT_VERSION, 2,
-			EGL_NONE
+			EGL_NONE, EGL_NONE
 		};
-
+		
 		EGLConfig	aEGLConfigs[1];
-		EGLint		cEGLConfigs;
-
-
+		EGLint		numConfigs;
+		EGLint		majorVersion;
+		EGLint		minorVersion;
+		
 		mEGLDisplay = EGL_CHECK(eglGetDisplay(hDisplay));
 
-		EGL_CHECK(eglInitialize(mEGLDisplay, NULL, NULL));
-		EGL_CHECK(eglChooseConfig(mEGLDisplay, aEGLAttributes, aEGLConfigs, 1, &cEGLConfigs));
-
-		if (cEGLConfigs == 0) {
+		EGL_CHECK(eglInitialize(mEGLDisplay, &majorVersion, &minorVersion));
+		EGL_CHECK(eglGetConfigs(mEGLDisplay, NULL, 0, &numConfigs));
+		EGL_CHECK(eglChooseConfig(mEGLDisplay, aEGLAttributes, aEGLConfigs, 1, &numConfigs));
+		if (numConfigs == 0) { 
 			printf("No EGL configurations were returned.\n");
 			return false;
 		}
 
 		mEGLSurface = EGL_CHECK(eglCreateWindowSurface(mEGLDisplay, aEGLConfigs[0], (EGLNativeWindowType)hWindow, NULL));
-
 		if (mEGLSurface == EGL_NO_SURFACE) {
 			printf("Failed to create EGL surface.\n");
 			return false;
 		}
 
 		mEGLContext = EGL_CHECK(eglCreateContext(mEGLDisplay, aEGLConfigs[0], EGL_NO_CONTEXT, aEGLContextAttributes));
-
 		if (mEGLContext == EGL_NO_CONTEXT) {
 			printf("Failed to create EGL context.\n");
 			return false;
@@ -169,11 +190,16 @@ namespace easy2d {
 		GL_CHECK(glEnable(GL_DEPTH_TEST));
 		GL_CHECK(glViewport (0, 0, width, height));
 
+		mWidth = width;
+		mHeight = height;
+
 		return true;
 	}
 
 	void GLES2Video::clear(unsigned int color /* = 0x00000000 */)
 	{
+		glViewport ( 0, 0, mWidth, mHeight );
+
 		if (mClearColor != color) {
 			mClearColor = color;
 			GLclampf magicNum = 1.0f / 255.0f;
@@ -195,10 +221,22 @@ namespace easy2d {
 
 	void GLES2Video::render()
 	{
+		GLfloat vVertices[] = {  0.0f,  0.5f, 0.0f, 
+			-0.5f, -0.5f, 0.0f,
+			0.5f, -0.5f, 0.0f };
+
+		// Load the vertex data
+		glVertexAttribPointer ( 0, 3, GL_FLOAT, GL_FALSE, 0, vVertices );
+		glEnableVertexAttribArray ( 0 );
+
+		glDrawArrays ( GL_TRIANGLES, 0, 3 );
+		
+
 		// 测试的代码
 		//glDrawArrays ( GL_TRIANGLES, 0, 3 );
-		 GLushort indices[] = { 0, 1, 2, 0, 2, 3 };
-		glDrawElements ( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, indices );
+
+		//GLushort indices[] = { 0, 1, 2, 0, 2, 3 };
+		//GL_CHECK( glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, indices) );
 	}
 
 
