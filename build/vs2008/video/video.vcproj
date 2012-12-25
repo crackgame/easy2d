@@ -159,6 +159,14 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath="..\..\..\engine\video\IShader.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\engine\video\ITexture.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\engine\video\IVideo.h"
 				>
 			</File>

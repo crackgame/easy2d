@@ -47,12 +47,19 @@ public:
 			"precision mediump float;					  \n"
 			"varying vec2 v_texCoord;                     \n"
 			"uniform sampler2D s_baseMap;                 \n"
+			"uniform sampler2D s_lightMap;                \n"
 			"void main()                                  \n"
 			"{                                            \n"
 			"  vec4 baseColor;                            \n"
+			"  vec4 lightColor;                           \n"
 
 			"  baseColor = texture2D( s_baseMap, v_texCoord );   \n"
-			"  gl_FragColor = baseColor * vec4 ( 1.0, 1.0, 0.0, 0.0 );\n"
+			"  lightColor = texture2D( s_lightMap, v_texCoord ); \n"
+			"  gl_FragColor = baseColor * (lightColor + 0.25);   \n"
+
+//			"  gl_FragColor = gl_FragColor * vec4 ( 1.0, 1.0, 0.0, 0.0 );\n"
+
+//			"  gl_FragColor = baseColor * vec4 ( 1.0, 1.0, 0.0, 0.0 );\n"
 //			"  gl_FragColor = baseColor;					\n"
 			"}                                            \n";
 
@@ -68,10 +75,14 @@ public:
 		mTexs[0] = mVideo->createTexture();
 		mTexs[0]->create("basemap.tga");
 
+		mTexs[1] = mVideo->createTexture();
+		mTexs[1]->create("lightmap.tga");
+
 		mPositionLoc = mShader->getAttribLocation("a_position");
 		mTexCoordLoc = mShader->getAttribLocation("a_texCoord");
 
 		mBaseMapLoc = mShader->getUniformLocation("s_baseMap");
+		mLightMapLoc = mShader->getUniformLocation("s_lightMap");
 
 		return true;
 	}
@@ -98,6 +109,12 @@ public:
 
 		// Load the texcoord data
 		mShader->setVertexPointer(mTexCoordLoc, &vVertices[3], 5 * sizeof(float), IShader::FLOAT_2);
+
+
+		mTexs[0]->bind(0);
+		mTexs[1]->bind(1);
+		mShader->setUniform1i(mBaseMapLoc, 0);
+		mShader->setUniform1i(mLightMapLoc, 1);
 
 		mVideo->render();
 
