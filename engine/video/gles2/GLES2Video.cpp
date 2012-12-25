@@ -170,7 +170,14 @@ namespace easy2d {
 	void GLES2Video::render()
 	{
 		// 测试的代码
-		glDrawArrays ( GL_TRIANGLES, 0, 3 );
+		//glDrawArrays ( GL_TRIANGLES, 0, 3 );
+
+		//index方式
+		//GLushort indices[] = { 0, 1, 2 };
+		//glDrawElements ( GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, indices );
+
+		GLushort indices[] = { 0, 1, 2, 0, 2, 3 };
+		glDrawElements ( GL_TRIANGLES, sizeof(indices)/sizeof(indices[0]), GL_UNSIGNED_SHORT, indices );
 	}
 
 

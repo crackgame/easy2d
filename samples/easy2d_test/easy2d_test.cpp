@@ -17,20 +17,44 @@ class GameAppListener : public IApplication::IApplicationEventListener
 public:
 	virtual bool onLaunch()
 	{
+		/*
 		char vShaderStr[] =  
-			"attribute vec4 vPosition;    \n"
+			"attribute vec4 a_position;    \n"
 			"void main()                  \n"
 			"{                            \n"
-			"   gl_Position = vPosition;  \n"
+			"   gl_Position = a_position;  \n"
 			"}                            \n";
 
 		char fShaderStr[] =  
 			"precision mediump float;\n"\
 			"void main()                                  \n"
 			"{                                            \n"
-			"  gl_FragColor = vec4 ( 1.0, 0.0, 0.0, 1.0 );\n"
+			"  gl_FragColor = vec4 ( 1.0, 1.0, 0.0, 0.0 );\n"
 			"}                                            \n";
+		*/
 
+		char vShaderStr[] =  
+			"attribute vec4 a_position;    \n"
+			"attribute vec2 a_texCoord;   \n"
+			"varying vec2 v_texCoord;     \n"
+			"void main()                  \n"
+			"{                            \n"
+			"   gl_Position = a_position;  \n"
+			"   v_texCoord = a_texCoord;  \n"
+			"}                            \n";
+
+		char fShaderStr[] =  
+			"precision mediump float;					  \n"
+			"varying vec2 v_texCoord;                     \n"
+			"uniform sampler2D s_baseMap;                 \n"
+			"void main()                                  \n"
+			"{                                            \n"
+			"  vec4 baseColor;                            \n"
+
+			"  baseColor = texture2D( s_baseMap, v_texCoord );   \n"
+			"  gl_FragColor = baseColor * vec4 ( 1.0, 1.0, 0.0, 0.0 );\n"
+//			"  gl_FragColor = baseColor;					\n"
+			"}                                            \n";
 
 		mVideo = CreateVideoGLES2();
 		int width  = g_pApp->getWidth();
@@ -41,23 +65,39 @@ public:
 		mShader = mVideo->createShader();
 		mShader->create(vShaderStr, fShaderStr);
 
-		gvPositionHandle = mShader->getAttribLocation("vPosition");
+		mTexs[0] = mVideo->createTexture();
+		mTexs[0]->create("basemap.tga");
+
+		mPositionLoc = mShader->getAttribLocation("a_position");
+		mTexCoordLoc = mShader->getAttribLocation("a_texCoord");
+
+		mBaseMapLoc = mShader->getUniformLocation("s_baseMap");
 
 		return true;
 	}
 
 	virtual void onRender()
 	{
-		float vVertices[] = {  0.0f,  0.5f, 0.0f, 
-			-0.5f, -0.5f, 0.0f,
-			0.5f, -0.5f, 0.0f };
+		float vVertices[] = {
+			-0.5f,  0.5f, 0.0f,  // Position 0
+			0.0f,  0.0f,        // TexCoord 0 
+			-0.5f, -0.5f, 0.0f,  // Position 1
+			0.0f,  1.0f,        // TexCoord 1
+			0.5f, -0.5f, 0.0f,  // Position 2
+			1.0f,  1.0f,        // TexCoord 2
+			0.5f,  0.5f, 0.0f,  // Position 3
+			1.0f,  0.0f         // TexCoord 3
+		};
 
 		mVideo->clear(0xFF808080);
 
 		mShader->use();
 
 		// Load the vertex data
-		mShader->setVertexPointer(gvPositionHandle, vVertices, 0, IShader::FLOAT_3);
+		mShader->setVertexPointer(mPositionLoc, vVertices, 5 * sizeof(float), IShader::FLOAT_3);
+
+		// Load the texcoord data
+		mShader->setVertexPointer(mTexCoordLoc, &vVertices[3], 5 * sizeof(float), IShader::FLOAT_2);
 
 		mVideo->render();
 
@@ -87,13 +127,11 @@ public:
 	IShader* mShader;
 	ITexture* mTexs[MAX_TEX];
 
-	unsigned int gvPositionHandle;
+	int mPositionLoc;
+	int mTexCoordLoc;
 
-	int positionLoc;
-	int texCoordLoc;
-
-	int baseMapLoc;
-	int lightMapLoc;
+	int mBaseMapLoc;
+	int mLightMapLoc;
 };
 
 
