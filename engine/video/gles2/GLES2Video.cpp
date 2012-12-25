@@ -169,6 +169,10 @@ namespace easy2d {
 
 	void GLES2Video::render()
 	{
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//glBlendFunc(1, 771);
+
 		// ²âÊÔµÄ´úÂë
 		//glDrawArrays ( GL_TRIANGLES, 0, 3 );
 

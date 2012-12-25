@@ -7,9 +7,34 @@
 #include "IVideo.h"
 using namespace easy2d;
 
+#include <string>
+using namespace std;
+
 
 #define MAX_TEX	2
 IApplication* g_pApp = NULL;
+
+string loadShaderFile(const char* filename)
+{
+	FILE* file = fopen(filename, "r");
+	if (file == NULL)
+		return "";
+
+	fseek(file, 0, SEEK_END);
+	long filelen = ftell(file);
+	fseek(file, 0, SEEK_SET);
+	char* buff = new char[filelen+1];
+	fread(buff, filelen, 1, file);
+	buff[filelen] = '\0';
+
+	fclose(file);
+
+	string strSource = buff;
+
+	delete[] buff;
+
+	return strSource;
+}
 
 
 class GameAppListener : public IApplication::IApplicationEventListener
@@ -60,8 +85,14 @@ public:
 //			"  gl_FragColor = gl_FragColor * vec4 ( 1.0, 1.0, 0.0, 0.0 );\n"
 
 //			"  gl_FragColor = baseColor * vec4 ( 1.0, 1.0, 0.0, 0.0 );\n"
-//			"  gl_FragColor = baseColor;					\n"
+			"  gl_FragColor.r = baseColor.r + lightColor.r;					\n"
+			"  gl_FragColor.g = baseColor.g + lightColor.g;					\n"
+			"  gl_FragColor.b = baseColor.b + lightColor.b;					\n"
+			"  gl_FragColor.a = baseColor.a + lightColor.a;					\n"
 			"}                                            \n";
+
+		string strVertexSrc = loadShaderFile("shader.vert");
+		string strFragmentSrc = loadShaderFile("shader.frag");
 
 		mVideo = CreateVideoGLES2();
 		int width  = g_pApp->getWidth();
@@ -70,13 +101,13 @@ public:
 		mVideo->create(hWindow, width, height, false);
 
 		mShader = mVideo->createShader();
-		mShader->create(vShaderStr, fShaderStr);
+		mShader->create(strVertexSrc.c_str(), strFragmentSrc.c_str());
 
 		mTexs[0] = mVideo->createTexture();
-		mTexs[0]->create("basemap.tga");
+		mTexs[0]->create("衣服001.TGA");
 
 		mTexs[1] = mVideo->createTexture();
-		mTexs[1]->create("lightmap.tga");
+		mTexs[1]->create("武器001.tga");
 
 		mPositionLoc = mShader->getAttribLocation("a_position");
 		mTexCoordLoc = mShader->getAttribLocation("a_texCoord");
@@ -90,13 +121,13 @@ public:
 	virtual void onRender()
 	{
 		float vVertices[] = {
-			-0.5f,  0.5f, 0.0f,  // Position 0
+			-1.0f,  1.0f, 0.0f,  // Position 0
 			0.0f,  0.0f,        // TexCoord 0 
-			-0.5f, -0.5f, 0.0f,  // Position 1
+			-1.0f, -1.0f, 0.0f,  // Position 1
 			0.0f,  1.0f,        // TexCoord 1
-			0.5f, -0.5f, 0.0f,  // Position 2
+			1.0f, -1.0f, 0.0f,  // Position 2
 			1.0f,  1.0f,        // TexCoord 2
-			0.5f,  0.5f, 0.0f,  // Position 3
+			1.0f,  1.0f, 0.0f,  // Position 3
 			1.0f,  0.0f         // TexCoord 3
 		};
 
@@ -170,13 +201,12 @@ int main()
 	g_pApp = CreateApplication();
 	g_pApp->setTitle( TEXT("OpenglES2-游戏窗口") );
 	g_pApp->setEventListener(&appEvent);
-	g_pApp->start(320, 240);
+	g_pApp->start(512, 512);
 
 
 	// 释放所有资源
 	ReleaseApplication(&g_pApp);
 	ReleaseVideo(&appEvent.mVideo);
-	
 
 	return 0;
 }

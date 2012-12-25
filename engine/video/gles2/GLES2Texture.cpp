@@ -12,6 +12,7 @@
 //  Macros
 //
 #define INVERTED_BIT            (1 << 5)
+#define INVERTED_RGB            (1 << 3)
 
 ///
 //  Types
@@ -56,16 +57,24 @@ namespace easy2d {
 
 	bool GLES2Texture::create(const char* filename)
 	{
-		unsigned char* buffer = loadTGA(filename);
+		int colorDepth = 0;
+		unsigned char* buffer = loadTGA(filename, colorDepth);
 		if (buffer == NULL)
 			return false;
 
 		glGenTextures ( 1, &mTexId );
 		glBindTexture ( GL_TEXTURE_2D, mTexId );
 
-		glTexImage2D ( GL_TEXTURE_2D, 0, GL_RGB, mWidth, mHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, buffer );
-		glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-		glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+		if (colorDepth == 32) {
+			glTexImage2D ( GL_TEXTURE_2D, 0, GL_RGBA, mWidth, mHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer );
+		} else {
+			glTexImage2D ( GL_TEXTURE_2D, 0, GL_RGB, mWidth, mHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, buffer );
+		}
+		
+		//glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+		//glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+		glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+		glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 		glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
 		glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
 
@@ -95,7 +104,7 @@ namespace easy2d {
 		return mHeight;
 	}
 
-	unsigned char* GLES2Texture::loadTGA(const char *fileName)
+	unsigned char* GLES2Texture::loadTGA(const char *fileName, int& colorDepth)
 	{
 		unsigned char* buffer;
 		FILE        *fp;
@@ -115,9 +124,10 @@ namespace easy2d {
 
 		mWidth = Header.Width;
 		mHeight = Header.Height;
+		colorDepth = Header.ColorDepth;
 
-		if ( Header.ColorDepth == 24 )
-		{
+		if ( Header.ColorDepth == 24 ) {
+			// 24位图片读取
 			RGBTRIPLE *Buffer24;
 
 			Buffer24= (RGBTRIPLE*)malloc(sizeof(RGBTRIPLE) * mWidth * mHeight);
@@ -132,7 +142,7 @@ namespace easy2d {
 
 				buffer= (unsigned char*) malloc(3 * mWidth * mHeight);
 
-				for ( y = 0; y < mHeight; y++ )
+				for ( y = 0; y < mHeight; y++ ) {
 					for( x = 0; x < mWidth; x++ )
 					{
 						int Index= y * mWidth + x;
@@ -146,11 +156,54 @@ namespace easy2d {
 
 						i++;
 					}
+				}
 
-					fclose(fp);
-					free(Buffer24);
-					return buffer;
+				fclose(fp);
+				free(Buffer24);
+				return buffer;
 			}		
+		} else if ( Header.ColorDepth == 32 ) {
+			// 32位图片读取
+			RGBQUAD *Buffer32;
+
+			Buffer32= (RGBQUAD*)malloc(sizeof(RGBQUAD) * mWidth * mHeight);
+
+			if (Buffer32) {
+				int i=0;
+				int x, y;
+
+				fread(Buffer32, sizeof(RGBQUAD), mWidth * mHeight, fp);
+
+				buffer= (unsigned char*) malloc(4 * mWidth * mHeight);
+
+				for(y = 0; y < mHeight; y++) {
+					for(x = 0; x < mWidth; x++)
+					{
+						int Index= y * mWidth + x;
+
+						if(!(Header.Descriptor & INVERTED_BIT))
+							Index= (mHeight - 1 - y) * mWidth + x;
+
+#if 1
+						buffer[(i * 4)]=      Buffer32[Index].rgbReserved;
+						buffer[(i * 4) + 1]=  Buffer32[Index].rgbRed;
+						buffer[(i * 4) + 2]=  Buffer32[Index].rgbGreen;
+						buffer[(i * 4) + 3]=  Buffer32[Index].rgbBlue;
+#else
+						buffer[(i * 4)]=      Buffer32[Index].rgbRed;
+						buffer[(i * 4) + 1]=  Buffer32[Index].rgbGreen;
+						buffer[(i * 4) + 2]=  Buffer32[Index].rgbBlue;
+						buffer[(i * 4) + 3]=  Buffer32[Index].rgbReserved;
+#endif
+
+						i++;
+					}
+				}
+
+				fclose(fp);
+				free(Buffer32);
+				return buffer;
+			}	
 		}
 
 		return NULL;
