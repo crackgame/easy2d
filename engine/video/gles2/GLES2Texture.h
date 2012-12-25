@@ -15,6 +15,7 @@ namespace easy2d {
 		virtual unsigned int getTextureId();
 
 	protected:
+		unsigned char* loadImage(const char* filename, int& colorDepth);
 		unsigned char* loadTGA(const char* filename, int& colorDepth);
 
 	protected:

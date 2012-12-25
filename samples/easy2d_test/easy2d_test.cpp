@@ -58,6 +58,7 @@ public:
 			"}                                            \n";
 		*/
 
+		/*
 		char vShaderStr[] =  
 			"attribute vec4 a_position;    \n"
 			"attribute vec2 a_texCoord;   \n"
@@ -90,9 +91,11 @@ public:
 			"  gl_FragColor.b = baseColor.b + lightColor.b;					\n"
 			"  gl_FragColor.a = baseColor.a + lightColor.a;					\n"
 			"}                                            \n";
+			*/
 
-		string strVertexSrc = loadShaderFile("shader.vert");
-		string strFragmentSrc = loadShaderFile("shader.frag");
+
+		string strVertexSrc = loadShaderFile("res/default.vert");
+		string strFragmentSrc = loadShaderFile("res/default.frag");
 
 		mVideo = CreateVideoGLES2();
 		int width  = g_pApp->getWidth();
@@ -104,10 +107,10 @@ public:
 		mShader->create(strVertexSrc.c_str(), strFragmentSrc.c_str());
 
 		mTexs[0] = mVideo->createTexture();
-		mTexs[0]->create("ÒÂ·ş001.TGA");
+		mTexs[0]->create("res/ÒÂ·ş001.png");
 
 		mTexs[1] = mVideo->createTexture();
-		mTexs[1]->create("ÎäÆ÷001.tga");
+		mTexs[1]->create("res/ÎäÆ÷001.png");
 
 		mPositionLoc = mShader->getAttribLocation("a_position");
 		mTexCoordLoc = mShader->getAttribLocation("a_texCoord");
@@ -115,11 +118,21 @@ public:
 		mBaseMapLoc = mShader->getUniformLocation("s_baseMap");
 		mLightMapLoc = mShader->getUniformLocation("s_lightMap");
 
+
+		
+
+		
+
+
 		return true;
 	}
 
 	virtual void onRender()
 	{
+		
+
+		mVideo->clear(0xFF808080);
+
 		float vVertices[] = {
 			-1.0f,  1.0f, 0.0f,  // Position 0
 			0.0f,  0.0f,        // TexCoord 0 
@@ -130,8 +143,6 @@ public:
 			1.0f,  1.0f, 0.0f,  // Position 3
 			1.0f,  0.0f         // TexCoord 3
 		};
-
-		mVideo->clear(0xFF808080);
 
 		mShader->use();
 

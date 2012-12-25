@@ -1,6 +1,8 @@
 #include "../ITexture.h"
+
 #include "GLES2/gl2.h"
 #include "EGL/egl.h"
+#include "FreeImage/FreeImage.h"
 
 #include "GLES2Texture.h"
 
@@ -58,7 +60,7 @@ namespace easy2d {
 	bool GLES2Texture::create(const char* filename)
 	{
 		int colorDepth = 0;
-		unsigned char* buffer = loadTGA(filename, colorDepth);
+		unsigned char* buffer = loadImage(filename, colorDepth);
 		if (buffer == NULL)
 			return false;
 
@@ -78,7 +80,7 @@ namespace easy2d {
 		glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
 		glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
 
-		free ( buffer );
+		delete[] buffer;
 
 		return true;
 	}
@@ -104,13 +106,13 @@ namespace easy2d {
 		return mHeight;
 	}
 
-	unsigned char* GLES2Texture::loadTGA(const char *fileName, int& colorDepth)
+	unsigned char* GLES2Texture::loadTGA(const char* filename, int& colorDepth)
 	{
 		unsigned char* buffer;
 		FILE        *fp;
 		TGA_HEADER   Header;
 
-		if ( fopen_s ( &fp, fileName, "rb" ) != 0 )
+		if ( fopen_s ( &fp, filename, "rb" ) != 0 )
 		{
 			return NULL;
 		}
@@ -130,7 +132,7 @@ namespace easy2d {
 			// 24位图片读取
 			RGBTRIPLE *Buffer24;
 
-			Buffer24= (RGBTRIPLE*)malloc(sizeof(RGBTRIPLE) * mWidth * mHeight);
+			Buffer24 = new RGBTRIPLE[mWidth * mHeight];
 
 			if(Buffer24)
 			{
@@ -140,7 +142,7 @@ namespace easy2d {
 
 				fread(Buffer24, sizeof(RGBTRIPLE), mWidth * mHeight, fp);
 
-				buffer= (unsigned char*) malloc(3 * mWidth * mHeight);
+				buffer= new unsigned char[3 * mWidth * mHeight];
 
 				for ( y = 0; y < mHeight; y++ ) {
 					for( x = 0; x < mWidth; x++ )
@@ -159,14 +161,14 @@ namespace easy2d {
 				}
 
 				fclose(fp);
-				free(Buffer24);
+				delete[] Buffer24;
 				return buffer;
 			}		
 		} else if ( Header.ColorDepth == 32 ) {
 			// 32位图片读取
 			RGBQUAD *Buffer32;
 
-			Buffer32= (RGBQUAD*)malloc(sizeof(RGBQUAD) * mWidth * mHeight);
+			Buffer32= new RGBQUAD[mWidth * mHeight];
 
 			if (Buffer32) {
 				int i=0;
@@ -174,7 +176,7 @@ namespace easy2d {
 
 				fread(Buffer32, sizeof(RGBQUAD), mWidth * mHeight, fp);
 
-				buffer= (unsigned char*) malloc(4 * mWidth * mHeight);
+				buffer= new unsigned char[4 * mWidth * mHeight];
 
 				for(y = 0; y < mHeight; y++) {
 					for(x = 0; x < mWidth; x++)
@@ -201,12 +203,63 @@ namespace easy2d {
 				}
 
 				fclose(fp);
-				free(Buffer32);
+				delete[] Buffer32;
 				return buffer;
 			}	
 		}
 
 		return NULL;
+	}
+
+	unsigned char* GLES2Texture::loadImage(const char *filename, int& colorDepth)
+	{
+		//image format
+		FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
+		//pointer to the image, once loaded
+		FIBITMAP *dib(0);
+		//pointer to the image data
+		BYTE* bits(0);
+		//image width and height
+		unsigned int width(0), height(0);
+
+		//check the file signature and deduce its format
+		fif = FreeImage_GetFileType(filename, 0);
+		//if still unknown, try to guess the file format from the file extension
+		if(fif == FIF_UNKNOWN) 
+			fif = FreeImage_GetFIFFromFilename(filename);
+		//if still unkown, return failure
+		if(fif == FIF_UNKNOWN)
+			return NULL;
+
+		//check that the plugin has reading capabilities and load the file
+		if(FreeImage_FIFSupportsReading(fif))
+			dib = FreeImage_Load(fif, filename);
+		//if the image failed to load, return failure
+		if(!dib)
+			return NULL;
+
+		int datasize = FreeImage_GetDIBSize(dib);
+		//retrieve the image data
+		bits = FreeImage_GetBits(dib);
+		//get the image width and height
+		width = FreeImage_GetWidth(dib);
+		height = FreeImage_GetHeight(dib);
+		//get the image bpp
+		colorDepth = FreeImage_GetBPP(dib);
+		//if this somehow one of these failed (they shouldn't), return failure
+		if((bits == 0) || (width == 0) || (height == 0))
+			return NULL;
+
+		mWidth = width;
+		mHeight = height;
+
+		unsigned char* buffer = new unsigned char[datasize];
+		memcpy(buffer, bits, datasize);
+
+		//Free FreeImage's copy of the data
+		FreeImage_Unload(dib);
+
+		return buffer;
 	}
 
 

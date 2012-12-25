@@ -17,6 +17,7 @@ namespace easy2d {
 		GLenum glError = glGetError(); \
 		if(glError != GL_NO_ERROR) { \
 			fprintf(stderr, "glGetError() = %i (0x%.8x) at line %i\n", glError, glError, __LINE__); \
+			system("pause");	\
 			exit(1); \
 		} \
 	}
@@ -140,9 +141,11 @@ namespace easy2d {
 
 
 		// 初始化gles2相关函数
-		GL_CHECK(glEnable(GL_CULL_FACE));
-		GL_CHECK(glEnable(GL_DEPTH_TEST));
-		GL_CHECK(glViewport (0, 0, width, height));
+		GL_CHECK( glEnable(GL_CULL_FACE) );
+		GL_CHECK( glEnable(GL_DEPTH_TEST) );
+		GL_CHECK( glEnable(GL_BLEND) );
+		GL_CHECK( glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) );
+		GL_CHECK( glViewport (0, 0, width, height) );
 
 		return true;
 	}
@@ -169,8 +172,7 @@ namespace easy2d {
 
 	void GLES2Video::render()
 	{
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		
 		//glBlendFunc(1, 771);
 
 		// 测试的代码
@@ -181,7 +183,12 @@ namespace easy2d {
 		//glDrawElements ( GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, indices );
 
 		GLushort indices[] = { 0, 1, 2, 0, 2, 3 };
-		glDrawElements ( GL_TRIANGLES, sizeof(indices)/sizeof(indices[0]), GL_UNSIGNED_SHORT, indices );
+		int count = sizeof(indices)/sizeof(indices[0]);
+		for (int i=0; i<1; i++) {
+			glDrawElements ( GL_TRIANGLES, count, GL_UNSIGNED_SHORT, indices );
+		}
+
+		//Sleep(1);
 	}
 
 

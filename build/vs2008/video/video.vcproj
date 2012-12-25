@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="libEGL.lib libGLESv2.lib"
+				AdditionalDependencies="libEGL.lib libGLESv2.lib FreeImage.lib"
 				OutputFile="$(OutDir)\$(ProjectName)_d.lib"
 				AdditionalLibraryDirectories="&quot;$(SolutionDir)../../engine/third_party/win32/lib&quot;"
 			/>
