@@ -14,14 +14,11 @@ namespace easy2d {
 	GLES2Shader::GLES2Shader()
 	{
 		mProgramObject = 0;
-		mVertexShader = 0;
-		mFragmentShader = 0;
 	}
 
 	GLES2Shader::~GLES2Shader()
 	{
-		if (mProgramObject > 0)
-			glDeleteShader(mProgramObject);
+		glDeleteShader(mProgramObject);
 	}
 
 	GLuint GLES2Shader::loadShader(GLenum type, const char *shaderSrc)
@@ -99,20 +96,23 @@ namespace easy2d {
 
 	bool GLES2Shader::create(const char* vertexSource, const char* fragmentSource)
 	{
-		mVertexShader = loadShader(GL_VERTEX_SHADER, vertexSource);
-		if (mVertexShader <= 0)
+		GLuint vertexShader = 0;
+		GLuint fragmentShader = 0;
+
+		vertexShader = loadShader(GL_VERTEX_SHADER, vertexSource);
+		if (vertexShader <= 0)
 			return false;
 
-		mFragmentShader = loadShader(GL_FRAGMENT_SHADER, fragmentSource);
-		if (mFragmentShader <= 0)
+		fragmentShader = loadShader(GL_FRAGMENT_SHADER, fragmentSource);
+		if (fragmentShader <= 0)
 			return false;
 
 		mProgramObject = glCreateProgram();
 		if (mProgramObject == 0)
 			return false;
 
-		glAttachShader (mProgramObject, mVertexShader);
-		glAttachShader (mProgramObject, mFragmentShader);
+		glAttachShader (mProgramObject, vertexShader);
+		glAttachShader (mProgramObject, fragmentShader);
 
 		// Bind vPosition to attribute 0   
 		glBindAttribLocation ( mProgramObject, 0, "vPosition" );
@@ -123,11 +123,8 @@ namespace easy2d {
 		if (!checkProgramInfoLog())
 			return false;
 
-		//if (mVertexShader > 0)
-		//	glDeleteShader(mVertexShader);
-
-		//if (mFragmentShader > 0)
-		//	glDeleteShader(mFragmentShader);
+		glDeleteShader(vertexShader);
+		glDeleteShader(fragmentShader);
 
 		return true;
 	}

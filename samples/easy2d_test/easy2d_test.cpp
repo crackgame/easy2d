@@ -5,13 +5,11 @@
 #include "easy2d_test.h"
 #include "IApplication.h"
 #include "IVideo.h"
-
 using namespace easy2d;
 
+
 #define MAX_TEX	2
-
 IApplication* g_pApp = NULL;
-
 
 
 class GameAppListener : public IApplication::IApplicationEventListener
@@ -19,66 +17,22 @@ class GameAppListener : public IApplication::IApplicationEventListener
 public:
 	virtual bool onLaunch()
 	{
-		// 安卓gl2例子
-		static const char vShaderStr[] = 
-			"attribute vec4 vPosition;\n"
-			"void main() {\n"
-			"  gl_Position = vPosition;\n"
-			"}\n";
-
-		static const char fShaderStr[] = 
-			"precision mediump float;\n"
-			"void main() {\n"
-			"  gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);\n"
-			"}\n";
-
-		/*
-		// 一个三角形
 		char vShaderStr[] =  
-		"attribute vec4 vPosition;    \n"
-		"void main()                  \n"
-		"{                            \n"
-		"   gl_Position = vPosition;  \n"
-		"}                            \n";
-
-		char fShaderStr[] =  
-		"precision mediump float;\n"\
-		"void main()                                  \n"
-		"{                                            \n"
-		"  gl_FragColor = vec4 ( 0.0, 1.0, 0.0, 1.0 );\n"
-		"}                                            \n";             
-		*/
-
-		/*
-		// 多级纹理
-		char vShaderStr[] =  
-			"attribute vec4 a_position;   \n"
-			"attribute vec2 a_texCoord;   \n"
-			"varying vec2 v_texCoord;     \n"
+			"attribute vec4 vPosition;    \n"
 			"void main()                  \n"
 			"{                            \n"
-			"   gl_Position = a_position; \n"
-			"   v_texCoord = a_texCoord;  \n"
+			"   gl_Position = vPosition;  \n"
 			"}                            \n";
 
 		char fShaderStr[] =  
-			"precision mediump float;                            \n"
-			"varying vec2 v_texCoord;                            \n"
-			"uniform sampler2D s_baseMap;                        \n"
-			"uniform sampler2D s_lightMap;                       \n"
-			"void main()                                         \n"
-			"{                                                   \n"
-			"  vec4 baseColor;                                   \n"
-			"  vec4 lightColor;                                  \n"
-			"                                                    \n"
-			"  baseColor = texture2D( s_baseMap, v_texCoord );   \n"
-			"  lightColor = texture2D( s_lightMap, v_texCoord ); \n"
-			"  gl_FragColor = baseColor * (lightColor + 0.25);   \n"
-			"}                                                   \n";
-			*/
+			"precision mediump float;\n"\
+			"void main()                                  \n"
+			"{                                            \n"
+			"  gl_FragColor = vec4 ( 1.0, 0.0, 0.0, 1.0 );\n"
+			"}                                            \n";
+
 
 		mVideo = CreateVideoGLES2();
-
 		int width  = g_pApp->getWidth();
 		int height = g_pApp->getHeight();
 		void* hWindow = g_pApp->getWindowHandle();
@@ -87,84 +41,27 @@ public:
 		mShader = mVideo->createShader();
 		mShader->create(vShaderStr, fShaderStr);
 
-		//positionLoc = mShader->getAttribLocation("a_position");
-		//texCoordLoc = mShader->getAttribLocation("a_texCoord");
-
-		//baseMapLoc = mShader->getUniformLocation ("s_baseMap");
-		//lightMapLoc = mShader->getUniformLocation ("s_lightMap");
-
-		//mTexs[0] = mVideo->createTexture();
-		//mTexs[0]->create("basemap.tga");
-
-		//mTexs[1] = mVideo->createTexture();
-		//mTexs[1]->create("lightmap.tga");
-
-		// 安卓gl2例子
-		 //gvPositionHandle = mShader->getAttribLocation("vPosition");
+		gvPositionHandle = mShader->getAttribLocation("vPosition");
 
 		return true;
 	}
 
 	virtual void onRender()
 	{
-		/*
-		float vVertices[] = {  
-			0.0f,  0.5f, 0.0f, 
+		float vVertices[] = {  0.0f,  0.5f, 0.0f, 
 			-0.5f, -0.5f, 0.0f,
 			0.5f, -0.5f, 0.0f };
-			*/
-
-		/*	多级纹理
-		float vVertices[] = {
-			-0.5f,  0.5f, 0.0f,  // Position 0
-			0.0f,  0.0f,        // TexCoord 0 
-			-0.5f, -0.5f, 0.0f,  // Position 1
-			0.0f,  1.0f,        // TexCoord 1
-			0.5f, -0.5f, 0.0f,  // Position 2
-			1.0f,  1.0f,        // TexCoord 2
-			0.5f,  0.5f, 0.0f,  // Position 3
-			1.0f,  0.0f         // TexCoord 3
-		};
-
-		mVideo->clear();
-
-		mShader->use();
-
-		// Load the vertex position
-		mShader->setVertexPointer(positionLoc, vVertices, 5 * sizeof(float), IShader::FLOAT_3);
-		// Load the texture coordinate
-		mShader->setVertexPointer(texCoordLoc, &vVertices[3], 5 * sizeof(float), IShader::FLOAT_2);
-
-		// Bind the base map
-		mTexs[0]->bind(0);
-
-		// Set the base map sampler to texture unit to 0
-		mShader->setUniform1i(baseMapLoc, 0);
-
-		// Bind the light map
-		mTexs[1]->bind(1);
-
-		// Set the light map sampler to texture unit 1
-		mShader->setUniform1i(lightMapLoc, 1);
-
-		mVideo->render();
-		
-		mVideo->present();
-		*/
-		
-		//const float gTriangleVertices[] = { 0.0f, 0.5f, -0.5f, -0.5f,
-		//	0.5f, -0.5f };
 
 		mVideo->clear(0xFF808080);
 
 		mShader->use();
 
-		//mShader->setVertexPointer(gvPositionHandle, gTriangleVertices, 0, IShader::FLOAT_2);
+		// Load the vertex data
+		mShader->setVertexPointer(gvPositionHandle, vVertices, 0, IShader::FLOAT_3);
 
 		mVideo->render();
 
 		mVideo->present();
-		
 		return;
 	}
 
@@ -197,8 +94,6 @@ public:
 
 	int baseMapLoc;
 	int lightMapLoc;
-
-private:
 };
 
 
@@ -220,7 +115,7 @@ int main()
 	g_pApp = CreateApplication();
 	g_pApp->setTitle( TEXT("OpenglES2-游戏窗口") );
 	g_pApp->setEventListener(&appEvent);
-	g_pApp->start(640, 480);
+	g_pApp->start(320, 240);
 
 
 	// 释放所有资源

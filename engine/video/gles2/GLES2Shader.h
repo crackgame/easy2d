@@ -22,8 +22,6 @@ namespace easy2d {
 
 	protected:
 		GLuint mProgramObject;
-		GLuint mVertexShader;
-		GLuint mFragmentShader;
 	};
 
 
