@@ -8,26 +8,14 @@
  * by a licensing agreement from ARM Limited.
  */
 
-/*
-attribute vec4 av4position;
-attribute vec3 av3colour;
-
-uniform mat4 mvp;
-
-varying vec3 vv3colour;
-
-void main() {
-	vv3colour = av3colour;
-	gl_Position = mvp * av4position;
-}
-*/
-
-// ∂‡º∂Œ∆¿Ì≤‚ ‘
+uniform float u_offset;
 attribute vec4 a_position;
 attribute vec2 a_texCoord;
 varying vec2 v_texCoord;
 void main()
 {
 	gl_Position = a_position;
+	gl_Position.x += u_offset;
+//	gl_Position = mvp * av4position;
 	v_texCoord = a_texCoord;
 }

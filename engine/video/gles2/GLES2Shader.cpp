@@ -174,6 +174,12 @@ namespace easy2d {
 		return true;
 	}
 
+	bool GLES2Shader::setUniform1f(int location, float x)
+	{
+		glUniform1f (location, x);
+		return true;
+	}
+
 	void GLES2Shader::use()
 	{
 		glUseProgram ( mProgramObject );

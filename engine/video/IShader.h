@@ -36,6 +36,7 @@ public:
 	virtual int getUniformLocation(const char* name) = 0;
 	virtual bool setVertexPointer(unsigned int index, const void* ptr, int stride, EVertexFormat foramt) = 0;
 	virtual bool setUniform1i(int location, int x) = 0;
+	virtual bool setUniform1f(int location, float x) = 0;
 	virtual void use() = 0;
 };
 

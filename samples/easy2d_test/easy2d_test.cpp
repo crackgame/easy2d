@@ -24,6 +24,7 @@ string loadShaderFile(const char* filename)
 	long filelen = ftell(file);
 	fseek(file, 0, SEEK_SET);
 	char* buff = new char[filelen+1];
+	memset(buff, 0, filelen+1);
 	fread(buff, filelen, 1, file);
 	buff[filelen] = '\0';
 
@@ -58,7 +59,7 @@ public:
 			"}                                            \n";
 		*/
 
-		/*
+		
 		char vShaderStr[] =  
 			"attribute vec4 a_position;    \n"
 			"attribute vec2 a_texCoord;   \n"
@@ -91,7 +92,7 @@ public:
 			"  gl_FragColor.b = baseColor.b + lightColor.b;					\n"
 			"  gl_FragColor.a = baseColor.a + lightColor.a;					\n"
 			"}                                            \n";
-			*/
+			
 
 
 		string strVertexSrc = loadShaderFile("res/default.vert");
@@ -105,41 +106,37 @@ public:
 
 		mShader = mVideo->createShader();
 		mShader->create(strVertexSrc.c_str(), strFragmentSrc.c_str());
+		//mShader->create(vShaderStr, fShaderStr);
 
 		mTexs[0] = mVideo->createTexture();
-		mTexs[0]->create("res/ÒÂ·þ001.png");
+		mTexs[0]->create("res/ÒÂ·þ001.tga");
 
-		mTexs[1] = mVideo->createTexture();
-		mTexs[1]->create("res/ÎäÆ÷001.png");
+		//mTexs[1] = mVideo->createTexture();
+		//mTexs[1]->create("res/ÎäÆ÷001.png");
 
+		mOffsetLoc = mShader->getUniformLocation("u_offset");
 		mPositionLoc = mShader->getAttribLocation("a_position");
 		mTexCoordLoc = mShader->getAttribLocation("a_texCoord");
-
-		mBaseMapLoc = mShader->getUniformLocation("s_baseMap");
-		mLightMapLoc = mShader->getUniformLocation("s_lightMap");
-
-
-		
-
-		
-
+		mTextureLoc = mShader->getUniformLocation("s_texture");
+		//mLightMapLoc = mShader->getUniformLocation("s_lightMap");
 
 		return true;
 	}
 
 	virtual void onRender()
 	{
-		
-
 		mVideo->clear(0xFF808080);
 
 		float vVertices[] = {
 			-1.0f,  1.0f, 0.0f,  // Position 0
 			0.0f,  0.0f,        // TexCoord 0 
+
 			-1.0f, -1.0f, 0.0f,  // Position 1
 			0.0f,  1.0f,        // TexCoord 1
+
 			1.0f, -1.0f, 0.0f,  // Position 2
 			1.0f,  1.0f,        // TexCoord 2
+
 			1.0f,  1.0f, 0.0f,  // Position 3
 			1.0f,  0.0f         // TexCoord 3
 		};
@@ -153,14 +150,17 @@ public:
 		mShader->setVertexPointer(mTexCoordLoc, &vVertices[3], 5 * sizeof(float), IShader::FLOAT_2);
 
 
-		mTexs[0]->bind(0);
-		mTexs[1]->bind(1);
-		mShader->setUniform1i(mBaseMapLoc, 0);
-		mShader->setUniform1i(mLightMapLoc, 1);
+		//mTexs[0]->bind(0);
+		//mShader->setUniform1i(mTextureLoc, 0);
 
+		mShader->setUniform1f(mOffsetLoc, 0.0f);
+		mVideo->render();
+
+		mShader->setUniform1f(mOffsetLoc, 0.1f);
 		mVideo->render();
 
 		mVideo->present();
+
 		return;
 	}
 
@@ -186,10 +186,11 @@ public:
 	IShader* mShader;
 	ITexture* mTexs[MAX_TEX];
 
+	int mOffsetLoc;
 	int mPositionLoc;
 	int mTexCoordLoc;
+	int mTextureLoc;
 
-	int mBaseMapLoc;
 	int mLightMapLoc;
 };
 

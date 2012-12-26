@@ -141,10 +141,12 @@ namespace easy2d {
 
 
 		// 初始化gles2相关函数
+		GL_CHECK( glEnable(GL_TEXTURE_2D) );
 		GL_CHECK( glEnable(GL_CULL_FACE) );
-		GL_CHECK( glEnable(GL_DEPTH_TEST) );
+		//GL_CHECK( glEnable(GL_DEPTH_TEST) );	// 默认不开深度测试，开了会有显示问题
 		GL_CHECK( glEnable(GL_BLEND) );
 		GL_CHECK( glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) );
+		//GL_CHECK( glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA) );
 		GL_CHECK( glViewport (0, 0, width, height) );
 
 		return true;
@@ -162,7 +164,7 @@ namespace easy2d {
 			GL_CHECK( glClearColor(r, g, b, a) );
 		}
 
-		GL_CHECK( glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT) );
+		GL_CHECK( glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) );
 	}
 
 	void GLES2Video::present()

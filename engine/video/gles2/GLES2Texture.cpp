@@ -14,7 +14,6 @@
 //  Macros
 //
 #define INVERTED_BIT            (1 << 5)
-#define INVERTED_RGB            (1 << 3)
 
 ///
 //  Types
@@ -87,7 +86,7 @@ namespace easy2d {
 
 	void GLES2Texture::bind(int index)
 	{
-		glActiveTexture(GL_TEXTURE0 + index);
+		//glActiveTexture(GL_TEXTURE0 + index);
 		glBindTexture(GL_TEXTURE_2D, mTexId);
 	}
 
@@ -253,8 +252,15 @@ namespace easy2d {
 		mWidth = width;
 		mHeight = height;
 
+		// BGRA ×ª³É RGBA
 		unsigned char* buffer = new unsigned char[datasize];
-		memcpy(buffer, bits, datasize);
+		int i=0;
+		for (i=0; i<datasize; i+=4) {
+			(buffer+i)[0] = (bits+i)[2];
+			(buffer+i)[1] = (bits+i)[1];
+			(buffer+i)[2] = (bits+i)[0];
+			(buffer+i)[3] = (bits+i)[3];
+		}
 
 		//Free FreeImage's copy of the data
 		FreeImage_Unload(dib);

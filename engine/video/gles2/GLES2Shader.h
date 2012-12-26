@@ -13,6 +13,7 @@ namespace easy2d {
 		virtual int getUniformLocation(const char* name);
 		virtual bool setVertexPointer(unsigned int index, const void* ptr, int stride, EVertexFormat foramt);
 		virtual bool setUniform1i(int location, int x);
+		virtual bool setUniform1f(int location, float x);
 		virtual void use();
 
 	protected:
