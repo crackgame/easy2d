@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)../../engine/application&quot;;&quot;$(SolutionDir)../../engine/video&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)../../engine/application&quot;;&quot;$(SolutionDir)../../engine/video&quot;;&quot;$(SolutionDir)../../engine/third_party/win32/include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"

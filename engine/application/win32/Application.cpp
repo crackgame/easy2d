@@ -71,46 +71,6 @@ namespace easy2d {
 			} else {
 				Sleep(1);
 			}
-
-
-			/*
-			// 游戏渲染循环在此处
-			rotate_matrix(iXangle, 1.0, 0.0, 0.0, aModelView);
-			rotate_matrix(iYangle, 0.0, 1.0, 0.0, aRotate);
-
-			multiply_matrix(aRotate, aModelView, aModelView);
-
-			rotate_matrix(iZangle, 0.0, 1.0, 0.0, aRotate);
-
-			multiply_matrix(aRotate, aModelView, aModelView);
-
-			aModelView[14] -= 2.5;
-
-			perspective_matrix(45.0, (double)uiWidth/(double)uiHeight, 0.01, 100.0, aPerspective);
-			multiply_matrix(aPerspective, aModelView, aMVP);
-
-			GL_CHECK(glUniformMatrix4fv(iLocMVP, 1, GL_FALSE, aMVP));
-
-			iXangle += 3;
-			iYangle += 2;
-			iZangle += 1;
-
-			if(iXangle >= 360) iXangle -= 360;
-			if(iXangle < 0) iXangle += 360;
-			if(iYangle >= 360) iYangle -= 360;
-			if(iYangle < 0) iYangle += 360;
-			if(iZangle >= 360) iZangle -= 360;
-			if(iZangle < 0) iZangle += 360;
-
-			GL_CHECK(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
-			GL_CHECK(glDrawArrays(GL_TRIANGLES, 0, 36));
-
-			if (!eglSwapBuffers(sEGLDisplay, sEGLSurface)) {
-				printf("Failed to swap buffers.\n");
-			}
-			*/
-	
-			
 		}
 
 		return true;
@@ -210,6 +170,8 @@ namespace easy2d {
 
 		case WM_SIZE:
 			{
+				int width = LOWORD(lParam);
+				int height = HIWORD(lParam);
 				Application* pApp = (Application*)(GetWindowLong(hWnd, GWL_USERDATA));
 				if (pApp == NULL) break;
 				switch (wParam)
@@ -221,6 +183,8 @@ namespace easy2d {
 					if (pApp->mAppListener) pApp->mAppListener->onEnterBackground();
 					break;
 				}
+
+				pApp->mAppListener->onScreenSizeChanged(width, height);
 			}
 			return 0;
 		}

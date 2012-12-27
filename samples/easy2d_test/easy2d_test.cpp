@@ -1,14 +1,21 @@
 // easy2d_test.cpp : 定义应用程序的入口点。
 //
 
+
+#include "kazmath/matrix.h"
+#include "kazmath/kazmath.h"
+
 #include "stdafx.h"
 #include "easy2d_test.h"
+
+
 #include "IApplication.h"
 #include "IVideo.h"
 using namespace easy2d;
 
 #include <string>
 using namespace std;
+
 
 
 #define MAX_TEX	2
@@ -43,58 +50,6 @@ class GameAppListener : public IApplication::IApplicationEventListener
 public:
 	virtual bool onLaunch()
 	{
-		/*
-		char vShaderStr[] =  
-			"attribute vec4 a_position;    \n"
-			"void main()                  \n"
-			"{                            \n"
-			"   gl_Position = a_position;  \n"
-			"}                            \n";
-
-		char fShaderStr[] =  
-			"precision mediump float;\n"\
-			"void main()                                  \n"
-			"{                                            \n"
-			"  gl_FragColor = vec4 ( 1.0, 1.0, 0.0, 0.0 );\n"
-			"}                                            \n";
-		*/
-
-		
-		char vShaderStr[] =  
-			"attribute vec4 a_position;    \n"
-			"attribute vec2 a_texCoord;   \n"
-			"varying vec2 v_texCoord;     \n"
-			"void main()                  \n"
-			"{                            \n"
-			"   gl_Position = a_position;  \n"
-			"   v_texCoord = a_texCoord;  \n"
-			"}                            \n";
-
-		char fShaderStr[] =  
-			"precision mediump float;					  \n"
-			"varying vec2 v_texCoord;                     \n"
-			"uniform sampler2D s_baseMap;                 \n"
-			"uniform sampler2D s_lightMap;                \n"
-			"void main()                                  \n"
-			"{                                            \n"
-			"  vec4 baseColor;                            \n"
-			"  vec4 lightColor;                           \n"
-
-			"  baseColor = texture2D( s_baseMap, v_texCoord );   \n"
-			"  lightColor = texture2D( s_lightMap, v_texCoord ); \n"
-			"  gl_FragColor = baseColor * (lightColor + 0.25);   \n"
-
-//			"  gl_FragColor = gl_FragColor * vec4 ( 1.0, 1.0, 0.0, 0.0 );\n"
-
-//			"  gl_FragColor = baseColor * vec4 ( 1.0, 1.0, 0.0, 0.0 );\n"
-			"  gl_FragColor.r = baseColor.r + lightColor.r;					\n"
-			"  gl_FragColor.g = baseColor.g + lightColor.g;					\n"
-			"  gl_FragColor.b = baseColor.b + lightColor.b;					\n"
-			"  gl_FragColor.a = baseColor.a + lightColor.a;					\n"
-			"}                                            \n";
-			
-
-
 		string strVertexSrc = loadShaderFile("res/default.vert");
 		string strFragmentSrc = loadShaderFile("res/default.frag");
 
@@ -106,57 +61,97 @@ public:
 
 		mShader = mVideo->createShader();
 		mShader->create(strVertexSrc.c_str(), strFragmentSrc.c_str());
-		//mShader->create(vShaderStr, fShaderStr);
 
 		mTexs[0] = mVideo->createTexture();
 		mTexs[0]->create("res/衣服001.tga");
 
-		//mTexs[1] = mVideo->createTexture();
-		//mTexs[1]->create("res/武器001.png");
+		mTexs[1] = mVideo->createTexture();
+		mTexs[1]->create("res/武器001.tga");
 
-		mOffsetLoc = mShader->getUniformLocation("u_offset");
-		mPositionLoc = mShader->getAttribLocation("a_position");
-		mTexCoordLoc = mShader->getAttribLocation("a_texCoord");
-		mTextureLoc = mShader->getUniformLocation("s_texture");
-		//mLightMapLoc = mShader->getUniformLocation("s_lightMap");
+		mMVPMatrixLoc = mShader->getUniformLocation("u_MVPMatrix");
+		mTextureLoc   = mShader->getUniformLocation("s_texture");
+
+		mPositionLoc  = mShader->getAttribLocation("a_position");
+		mTexCoordLoc  = mShader->getAttribLocation("a_texCoord");
+		mColorLoc	  = mShader->getAttribLocation("a_color");
 
 		return true;
 	}
+
+	struct stVertex
+	{
+		float x, y, z;
+		float u, v;
+		float r, g, b, a;
+	};
+
+	struct stQuad
+	{
+		stVertex lb;	// 左下
+		stVertex lt;	// 左上
+		stVertex rb;	// 右下
+		stVertex rt;	// 右上
+	};
 
 	virtual void onRender()
 	{
 		mVideo->clear(0xFF808080);
 
-		float vVertices[] = {
-			-1.0f,  1.0f, 0.0f,  // Position 0
-			0.0f,  0.0f,        // TexCoord 0 
 
-			-1.0f, -1.0f, 0.0f,  // Position 1
-			0.0f,  1.0f,        // TexCoord 1
+		//												2d (opengl)
+		stVertex vVertices[] = {
+			{
+				0.0f,  512.0f, 0.0f,  // Position 0		左下（左上）
+				0.0f,  0.0f,			// TexCoord 0 
+				1.0, 1.0, 1.0, 1.0,		// Color 0
+			},
 
-			1.0f, -1.0f, 0.0f,  // Position 2
-			1.0f,  1.0f,        // TexCoord 2
+			{
+				0.0f,  0.0f, 0.0f,  // Position 1		左上（左下）
+				0.0f,  1.0f,        // TexCoord 1
+				1.0, 1.0, 1.0, 1.0, // Color 1
+			},
 
-			1.0f,  1.0f, 0.0f,  // Position 3
-			1.0f,  0.0f         // TexCoord 3
+			{
+				512.0f,  512.0f, 0.0f,  // Position 3	右下（右上）
+				1.0f,  0.0f,         // TexCoord 3
+				1.0, 1.0, 1.0, 1.0, // Color 2
+			},
+
+			{
+				512.0f, 0.0f, 0.0f,  // Position 2		右上（右下）
+				1.0f,  1.0f,        // TexCoord 2
+				1.0, 1.0, 1.0, 1.0, // Color 3
+			},
 		};
 
 		mShader->use();
 
 		// Load the vertex data
-		mShader->setVertexPointer(mPositionLoc, vVertices, 5 * sizeof(float), IShader::FLOAT_3);
+		mShader->setVertexPointer(mPositionLoc, &vVertices[0].x, sizeof(stVertex), IShader::FLOAT_3);
 
 		// Load the texcoord data
-		mShader->setVertexPointer(mTexCoordLoc, &vVertices[3], 5 * sizeof(float), IShader::FLOAT_2);
+		mShader->setVertexPointer(mTexCoordLoc, &vVertices[0].u, sizeof(stVertex), IShader::FLOAT_2);
+
+		// Load the color data
+		mShader->setVertexPointer(mColorLoc,	&vVertices[0].r, sizeof(stVertex), IShader::FLOAT_4);
 
 
-		//mTexs[0]->bind(0);
-		//mShader->setUniform1i(mTextureLoc, 0);
+		kmMat4 matrixP;
+		kmMat4 matrixMV;
+		kmMat4 matrixMVP;
+		kmGLGetMatrix(KM_GL_PROJECTION, &matrixP );
+		kmGLGetMatrix(KM_GL_MODELVIEW, &matrixMV );
+		kmMat4Multiply(&matrixMVP, &matrixP, &matrixMV);
+		mShader->setUniformMatrix4fv(mMVPMatrixLoc, matrixMVP.mat);
 
-		mShader->setUniform1f(mOffsetLoc, 0.0f);
+
+		mTexs[0]->bind(0);
+		mShader->setUniform1i(mTextureLoc, 0);
 		mVideo->render();
 
-		mShader->setUniform1f(mOffsetLoc, 0.1f);
+		mTexs[1]->bind(0);
+		mShader->setUniform1i(mTextureLoc, 0);
 		mVideo->render();
 
 		mVideo->present();
@@ -177,7 +172,7 @@ public:
 
 	virtual void onScreenSizeChanged(int width, int height)
 	{
-
+		mVideo->resize(width, height);
 		return;
 	}
 
@@ -186,12 +181,11 @@ public:
 	IShader* mShader;
 	ITexture* mTexs[MAX_TEX];
 
-	int mOffsetLoc;
+	int mMVPMatrixLoc;
 	int mPositionLoc;
 	int mTexCoordLoc;
 	int mTextureLoc;
-
-	int mLightMapLoc;
+	int mColorLoc;
 };
 
 
@@ -213,7 +207,7 @@ int main()
 	g_pApp = CreateApplication();
 	g_pApp->setTitle( TEXT("OpenglES2-游戏窗口") );
 	g_pApp->setEventListener(&appEvent);
-	g_pApp->start(512, 512);
+	g_pApp->start(800, 600);
 
 
 	// 释放所有资源

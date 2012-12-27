@@ -12,6 +12,7 @@ namespace easy2d {
 		virtual void clear(unsigned int color = 0x00000000);
 		virtual void present();
 		virtual void render();
+		virtual void resize(unsigned int width, unsigned int height);
 
 		// ¹¤³§º¯Êý
 		virtual IShader* createShader();
@@ -21,8 +22,8 @@ namespace easy2d {
 		void cleanup();
 
 	protected:
-		int		mWidth;
-		int		mHeight;
+		//int		mWidth;
+		//int		mHeight;
 		void*	mEGLDisplay;
 		void*	mEGLSurface;
 		void*	mEGLContext;

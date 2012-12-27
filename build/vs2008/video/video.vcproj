@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="libEGL.lib libGLESv2.lib FreeImage.lib"
+				AdditionalDependencies="libEGL.lib libGLESv2.lib FreeImage.lib kazmath.lib"
 				OutputFile="$(OutDir)\$(ProjectName)_d.lib"
 				AdditionalLibraryDirectories="&quot;$(SolutionDir)../../engine/third_party/win32/lib&quot;"
 			/>
@@ -159,6 +159,10 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath="..\..\..\engine\video\e3dmath.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\engine\video\IShader.h"
 				>
 			</File>
@@ -216,6 +220,14 @@
 			</File>
 			<File
 				RelativePath="..\..\..\engine\video\direct3d9\D3D9Video.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="e3dmath"
+			>
+			<File
+				RelativePath="..\..\..\engine\video\e3dmath\e3dmath.cpp"
 				>
 			</File>
 		</Filter>

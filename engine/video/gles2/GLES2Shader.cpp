@@ -180,6 +180,12 @@ namespace easy2d {
 		return true;
 	}
 
+	bool GLES2Shader::setUniformMatrix4fv(int location, const float* values)
+	{	
+		glUniformMatrix4fv(location, 1, GL_FALSE, values);
+		return true;
+	}
+
 	void GLES2Shader::use()
 	{
 		glUseProgram ( mProgramObject );

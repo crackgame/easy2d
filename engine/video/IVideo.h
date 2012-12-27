@@ -21,6 +21,7 @@ public:
 	virtual void clear(unsigned int color = 0x00000000) = 0;
 	virtual void present() = 0;
 	virtual void render() = 0;
+	virtual void resize(unsigned int width, unsigned int height) = 0;
 
 	// ¹¤³§º¯Êý
 	virtual IShader* createShader() = 0;

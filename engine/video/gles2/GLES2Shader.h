@@ -14,6 +14,7 @@ namespace easy2d {
 		virtual bool setVertexPointer(unsigned int index, const void* ptr, int stride, EVertexFormat foramt);
 		virtual bool setUniform1i(int location, int x);
 		virtual bool setUniform1f(int location, float x);
+		virtual bool setUniformMatrix4fv(int location, const float* values);
 		virtual void use();
 
 	protected:

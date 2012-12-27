@@ -1,4 +1,8 @@
 #include "../IVideo.h"
+
+#include "kazmath/kazmath.h"
+#include "kazmath/matrix.h"
+
 #include "GLES2/gl2.h"
 #include "EGL/egl.h"
 
@@ -8,6 +12,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
 
 namespace easy2d {
 
@@ -142,14 +147,37 @@ namespace easy2d {
 
 		// 初始化gles2相关函数
 		GL_CHECK( glEnable(GL_TEXTURE_2D) );
-		GL_CHECK( glEnable(GL_CULL_FACE) );
+		//GL_CHECK( glEnable(GL_CULL_FACE) );
 		//GL_CHECK( glEnable(GL_DEPTH_TEST) );	// 默认不开深度测试，开了会有显示问题
 		GL_CHECK( glEnable(GL_BLEND) );
 		GL_CHECK( glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) );
 		//GL_CHECK( glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA) );
-		GL_CHECK( glViewport (0, 0, width, height) );
+		
+
+		resize(width, height);
 
 		return true;
+	}
+
+	void GLES2Video::resize(unsigned int width, unsigned int height)
+	{
+		// 最小化时的特殊处理
+		if (width == 0 || height == 0)
+			return;
+
+		const float contentScal = 1.0f;
+
+		GL_CHECK( glViewport (0, 0, width, height) );
+
+		// 设置默认变换矩阵
+		kmGLMatrixMode(KM_GL_PROJECTION);
+		kmGLLoadIdentity();
+		kmMat4 orthoMatrix;
+		//kmMat4OrthographicProjection(&orthoMatrix, 0, width / contentScal, 0, height / contentScal, -1024, 1024 );	// 正面
+		kmMat4OrthographicProjection(&orthoMatrix, 0, width / contentScal, height / contentScal, 0, -1024, 1024 );		// 反面
+		kmGLMultMatrix(&orthoMatrix);
+		kmGLMatrixMode(KM_GL_MODELVIEW);
+		kmGLLoadIdentity();
 	}
 
 	void GLES2Video::clear(unsigned int color /* = 0x00000000 */)
@@ -184,11 +212,14 @@ namespace easy2d {
 		//GLushort indices[] = { 0, 1, 2 };
 		//glDrawElements ( GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, indices );
 
-		GLushort indices[] = { 0, 1, 2, 0, 2, 3 };
+		//GLushort indices[] = { 0, 1, 2, 0, 2, 3 };
+		GLushort indices[] = { 0, 1, 2, 2, 1, 3 };
 		int count = sizeof(indices)/sizeof(indices[0]);
 		for (int i=0; i<1; i++) {
 			glDrawElements ( GL_TRIANGLES, count, GL_UNSIGNED_SHORT, indices );
 		}
+
+		//glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 		//Sleep(1);
 	}

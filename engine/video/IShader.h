@@ -37,6 +37,7 @@ public:
 	virtual bool setVertexPointer(unsigned int index, const void* ptr, int stride, EVertexFormat foramt) = 0;
 	virtual bool setUniform1i(int location, int x) = 0;
 	virtual bool setUniform1f(int location, float x) = 0;
+	virtual bool setUniformMatrix4fv(int location, const float* values) = 0;
 	virtual void use() = 0;
 };
 
